@@ -69,12 +69,6 @@ CREATE TABLE "certificates" (
     FOREIGN KEY ("course_id") REFERENCES "courses" ("id")
 ) WITHOUT ROWID, STRICT;
 
--- tabela de valores gerais do sistema. a ideia eh guardar numero de usuarios, de cursos, de aulas, de alunos, etc
-CREATE TABLE "stats" (
-    "stat_name" TEXT NOT NULL PRIMARY KEY,
-    "value" INTEGER NOT NULL
-) WITHOUT ROWID, STRICT;
-
 -- tabela que guarda as sessoes de log in de cada usuario
 CREATE TABLE "sessions" (
     "token" TEXT PRIMARY KEY,
