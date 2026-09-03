@@ -1,5 +1,9 @@
 -- database: ../lms.sqlite
 
+-- essa consulta seleciona um usuario com base em seu e-mail
+SELECT * FROM "users"
+WHERE email = 'ana.silva@email.com';
+
 -- essa consulta seleciona todas as aulas de um curso com base no slug do curso
 SELECT * FROM "lessons_infos"
 WHERE course_slug = 'python-para-iniciantes';
@@ -49,3 +53,33 @@ SELECT
 FROM "lessons_completed_infos" 
 WHERE course_id = (SELECT id FROM "courses" WHERE slug = 'sql-e-arquitetura-db')
 GROUP BY username, course_id;
+
+-- essa consulta pega os principais dados de um usuario dado o seu username
+SELECT 
+    lci.user_id,
+    lci.username,
+    COUNT(DISTINCT lci.course_id) AS "courses_accessed",
+    SUM(l.duration) AS "total_watchtime",
+    COUNT(*) AS "lessons_watched",
+    COUNT(DISTINCT ci.certificate_id) AS "total_certificates"
+FROM "lessons_completed_infos" AS "lci"
+JOIN "lessons" AS "l" ON l.id = lci.lesson_id
+LEFT JOIN "certificates_infos" AS "ci" ON ci.username = lci.username AND ci.course_id = lci.course_id
+WHERE user_id = (SELECT id FROM "users" WHERE username = 'carlos_o')
+GROUP BY user_id;
+
+-- essa consulta analisa a taxa de conclusao de cada curso
+SELECT 
+    c.id AS "course_id",
+    c.title AS "course",
+    COUNT(DISTINCT e.user_id) AS "total_enrollments",
+    COUNT(DISTINCT cert.id) AS "total_certificates",
+    CASE 
+        WHEN COUNT(DISTINCT e.user_id) > 0
+        THEN format('%.2f%%', (COUNT(DISTINCT cert.id) * 1.0 / COUNT(DISTINCT e.user_id)) * 100)
+        ELSE '0.00%'
+    END AS "completion_rate"
+FROM "courses" AS "c"
+LEFT JOIN "enrollments" AS "e" ON e.course_id = c.id
+LEFT JOIN "certificates" AS "cert" ON cert.course_id = c.id
+GROUP BY c.id, c.slug;  
